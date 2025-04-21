@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     grid-area: cronometro;
-  
+    
     .relogioWrapper {
       align-items: center;
       background-color: #7687A1;
@@ -16,8 +16,40 @@
       margin-bottom: 24px;
       padding: 16px 12px;
       width: 100%;
+      flex-direction: column;
     }
   
+    .relogioWrapper div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .cronometroClock {
+      padding: 0.2em;
+      gap: 0.025px;
+    }
+
+    .cronometroLabel {
+      font-size: 0.25em;
+    }
+
+    .cronometroLabel span:first-child {
+      margin-left: 5em;
+      margin-right: 0em;
+    }
+
+    .cronometroLabel span:nth-child(2) {
+      margin-left: 3.5em;
+      margin-right: 2.25em;
+    }
+
+    .cronometroLabel span:last-child {
+      margin-left: 0.5em;
+      margin-right: 4.5em;
+    }
+
     .titulo {
       font-size: 2rem;
     }
@@ -39,14 +71,14 @@
       }
     }
   
-    @media screen and (min-width:1280px) {
+    @media screen and (min-width: 1280px) {
       
-      .relogioWrapper{
-        font-size: 15rem;
+      .cronometroLabel {
+        font-size: 0.25em;
       }
   
       p {
-        font-size: 2rem;
+        font-size: 2em;
       }
   
       button {

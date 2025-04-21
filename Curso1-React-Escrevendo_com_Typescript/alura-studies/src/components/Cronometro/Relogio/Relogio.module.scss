@@ -6,17 +6,14 @@
     padding: 8px 4px;
     border-radius: 10px;
     margin: 0.2px;
-  
-    @media screen and (min-width:1280px) {
-      height: 10.8rem;
-      width: 9rem;
-    }
   }
   
   .relogioDivisao {
     height: 4.2rem;
   
     @media screen and (min-width:1280px) {
-      height: 12.6rem;
+      .relogioNumero { 
+        height: 1em !important;
+      }
     }
   }
