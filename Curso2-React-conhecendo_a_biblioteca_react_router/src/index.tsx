@@ -2,11 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import 'normalize.css';
 import './index.css';
-import Cardapio from './pages/Cardapio';
+import PageRoutes from 'routes';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Cardapio />
+    <PageRoutes />
   </React.StrictMode>,
   document.getElementById('root')
 );
