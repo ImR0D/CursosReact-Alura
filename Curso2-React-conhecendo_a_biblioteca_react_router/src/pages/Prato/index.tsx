@@ -5,7 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import cardapio from 'data/cardapio.json';
 import PageNotFound from 'pages/NotFound';
 import TagsPrato from 'components/TagsPrato';
-import PaginaPadrao from 'components/Header';
+import PaginaPadrao from 'components/PaginaPadrao';
 
 
 export default function Prato() {

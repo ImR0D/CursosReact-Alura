@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Menu from 'components/Menu';
-import PaginaPadrao from 'components/Header';
+import PaginaPadrao from 'components/PaginaPadrao';
 import Inicio from 'pages/Inicio';
 import Cardapio from 'pages/Cardapio';
 import Sobre from 'pages/Sobre';
