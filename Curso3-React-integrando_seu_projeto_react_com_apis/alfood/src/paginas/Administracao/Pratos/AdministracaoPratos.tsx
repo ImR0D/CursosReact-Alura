@@ -3,14 +3,23 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import http from "../../../service"
 import IPrato from "../../../interfaces/IPrato"
+import IRestaurante from "../../../interfaces/IRestaurante"
 
 const AdministracaoPratos = () => {
 
     const [pratos, setPratos] = useState<IPrato[]>([])
+    const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([]);
 
     useEffect(() => {
+        http.get<IRestaurante[]>('restaurantes/')
+        .then( resposta => {
+            setRestaurantes(resposta.data)
+        })
         http.get<IPrato[]>('pratos/')
-            .then(resposta => setPratos(resposta.data))
+            .then(prato => {
+                setPratos(prato.data)
+            }
+        )
     }, []);
 
     function excluir(prato: IPrato) {
@@ -19,6 +28,12 @@ const AdministracaoPratos = () => {
             const novaListaRestaurantes = pratos.filter(item => item.id !== prato.id);
             setPratos([ ...novaListaRestaurantes]);
         });
+    }
+
+    let restaurantePrato = restaurantes;
+    function getNomeRestaurante(id: number) {
+        let restaurante = restaurantePrato.find(restaurante => restaurante.id === id)
+        return restaurante?.nome;
     }
 
     return (
@@ -41,7 +56,7 @@ const AdministracaoPratos = () => {
                             {prato.tag}
                         </TableCell>
                         <TableCell>
-                            {prato.restaurante}
+                            {getNomeRestaurante(prato.restaurante)}
                         </TableCell>
                         <TableCell>
                             <Button sx={{mr: '0.5em', width: '85px'}} variant="outlined" color="info">

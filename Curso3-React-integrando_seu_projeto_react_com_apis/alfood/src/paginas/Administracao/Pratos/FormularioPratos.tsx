@@ -1,124 +1,184 @@
-import { Box, Button, FormControl, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import http from "../../../service";
+import {
+  Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import IRestaurante from "../../../interfaces/IRestaurante";
+import ITag from "../../../interfaces/ITag";
+import { useParams } from "react-router-dom";
 import IPrato from "../../../interfaces/IPrato";
 
-const FormularioPratos = () => {
+const FormularioPrato = () => {
   const [nomePrato, setNomePrato] = useState("");
-  const [descricaoPrato, setDescricaoPrato] = useState("");
-  const [idRestaurantePrato, setIdRestaurantePrato] = useState<number>();
-  const [isEditing, setIsEditing] = useState(false);
+  const [descricao, setDescricao] = useState("");
 
-  const navigate = useNavigate();
+  const [tag, setTag] = useState("");
+  const [restaurante, setRestaurante] = useState("");
+
+  const [imagem, setImagem] = useState<File | null>(null);
+  const [imageURI, setImageURI] = useState<string>("");
+
+  const [tags, setTags] = useState<ITag[]>([]);
+  const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([]);
+
+  const [isEditing, setIsEditing] = useState<Boolean>(false);
+
+  const parametro = useParams();
+
+  useEffect(() => {
+    if (parametro.id) {
+      setIsEditing(true);
+      http.get<IPrato>(`pratos/${parametro.id}/`)
+      .then( resposta => setImageURI(resposta.data.imagem) )
+    } else {
+      setIsEditing(false);
+      setImageURI("https://st.depositphotos.com/1189140/1409/i/450/depositphotos_14095241-stock-photo-plate-fork-knife-white-empty.jpg");
+    }
+  }, [parametro]);
+
+  useEffect(() => {
+    http
+      .get<{ tags: ITag[] }>("tags/")
+      .then((resposta) => setTags(resposta.data.tags));
+    http
+      .get<IRestaurante[]>("restaurantes/")
+      .then((resposta) => setRestaurantes(resposta.data));
+  }, []);
+
+  const selecionarArquivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    if (evento.target.files?.length) {
+      setImagem(evento.target.files[0]);
+    } else {
+      setImagem(null);
+    }
+  };
 
   const aoSubmeterForm = (evento: React.FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
-    if (parametros.id) {
-      setIsEditing(true);
-      http
-        .patch(`pratos/${parametros.id}/`, {
-          nome: nomePrato,
-          descricao: descricaoPrato,
-          restaurante: idRestaurantePrato
-        })
-        .then(() => {
-          alert("Prato atualizado com sucesso!");
-        })
-        .catch((error) => console.log("Erro ao realizar ação"));
-      setTimeout(() => navigate(-1), 700);
-      return;
+
+    const formData = new FormData();
+
+    formData.append("nome", nomePrato);
+    formData.append("descricao", descricao);
+
+    formData.append("tag", tag);
+
+    formData.append("restaurante", restaurante);
+
+    if (imagem) {
+      formData.append("imagem", imagem);
     }
 
     http
-      .post("pratos/", {
-        nome: nomePrato,
-        descricao: descricaoPrato,
-        restaurante: idRestaurantePrato
+      .request({
+        url: "pratos/",
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        data: formData,
       })
       .then(() => {
+        setNomePrato("");
+        setDescricao("");
+        setTag("");
+        setRestaurante("");
         alert("Prato cadastrado com sucesso!");
-        setTimeout(() => navigate("/admin/pratos"), 700);
       })
-      .catch((error) => console.log("Erro ao realizar ação"));
+      .catch((erro) => console.log(erro));
   };
 
-  const parametros = useParams();
-  useEffect(() => {
-    setIsEditing(false);
-    if (parametros.id) {
-      setIsEditing(true);
-      http
-        .get<IPrato>(`pratos/${parametros.id}/`)
-        .then((resposta) => {
-          setNomePrato(resposta.data.nome)
-          setDescricaoPrato(resposta.data.descricao)
-          setIdRestaurantePrato(resposta.data.restaurante)
-        }
-      );
-    }
-  }, [parametros]);
-
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "stretch",
-          justifyContent: "center",
-          textAlign: 'center',
-          width: '100%'
-        }}
-      >
-        <Typography component="h1" variant="h6">
-          Formulário de pratos de restaurantes
-        </Typography>
-        <FormControl
-          variant="standard"
-          component={"form"}
-          onSubmit={aoSubmeterForm}
-          sx={{ m: "3em" }}
-        >
-          <TextField
-            value={nomePrato}
-            onChange={(evento) => setNomePrato(evento.target.value)}
-            label="Nome do Prato"
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        flexGrow: 1,
+      }}
+    >
+      <Typography component="h1" variant="h6" sx={{mt: '1em'}}>
+        Formulário de Pratos
+      </Typography>
+
+      <img src={imageURI} style={{ width: '40%', minWidth: '280px', margin: '1em' }} alt="Foto do prato" />
+
+      <Box component="form" sx={{ width: "100%" }} onSubmit={aoSubmeterForm}>
+        <TextField
+          value={nomePrato}
+          onChange={(evento) => setNomePrato(evento.target.value)}
+          label="Nome do Prato"
+          variant="outlined"
+          fullWidth
+          required
+          margin="dense"
+        />
+        <TextField
+          value={descricao}
+          onChange={(evento) => setDescricao(evento.target.value)}
+          label="Descrição do Prato"
+          variant="outlined"
+          fullWidth
+          required
+          margin="dense"
+        />
+
+        <FormControl margin="dense" fullWidth>
+          <InputLabel id="select-tag">Tag</InputLabel>
+          <Select
+            label="select-tag"
             variant="outlined"
             color="success"
-            sx={{ my: "1em" }}
-            required
-          />
-          <TextField
-            value={descricaoPrato}
-            onChange={(evento) => setDescricaoPrato(evento.target.value)}
-            label="Descricao"
-            variant="outlined"
-            color="success"
-            sx={{ my: "1em" }}
-            required
-          />
-          <TextField
-            value={idRestaurantePrato}
-            onChange={(evento) => setIdRestaurantePrato(Number(evento.target.value))}
-            label="Id do Restaurante"
-            variant="outlined"
-            color="success"
-            sx={{ my: "1em" }}
-            required
-          />
-          <Button
-            type="submit"
-            variant="outlined"
-            color="success"
-            sx={{ borderRadius: 0 }}
+            value={tag}
+            onChange={(evento) => setTag(evento.target.value)}
           >
-            {isEditing ? "Editar" : "Salvar"}
-          </Button>
+            {tags.map((tag) => (
+              <MenuItem key={tag.id} value={tag.value}>
+                {tag.value}
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
+
+        <FormControl margin="dense" fullWidth>
+          <InputLabel id="select-restaurante">Restaurante</InputLabel>
+          <Select
+            label="select-restaurante"
+            variant="outlined"
+            color="success"
+            value={restaurante}
+            required
+            onChange={(evento) => setRestaurante(evento.target.value)}
+          >
+            {restaurantes.map((restaurante) => (
+              <MenuItem key={restaurante.id} value={restaurante.id}>
+                {restaurante.nome}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <input style={{marginTop: '1em', marginBottom: '1em'}} type="file" onChange={selecionarArquivo} />
+
+        <Button
+          sx={{ marginTop: 1 }}
+          type="submit"
+          fullWidth
+          variant="outlined"
+          style={{padding: '0.5em', marginTop: '2em', marginBottom: '2em'}}
+        >
+          {isEditing ? "Editar" : "Salvar"}
+        </Button>
       </Box>
-    </>
+    </Box>
   );
 };
 
-export default FormularioPratos;
+export default FormularioPrato;
